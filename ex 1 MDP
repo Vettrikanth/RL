@@ -1,0 +1,63 @@
+from collections import namedtuple
+from enum import Enum
+
+Point = namedtuple('Point', ['x', 'y'])
+
+class Direction(Enum):
+    NORTH = "⬆"
+    EAST = "⮕"
+    SOUTH = "⬇"
+    WEST = "⬅"
+
+class SimpleGridWorld:
+    def _init_(self, width=5, height=5):
+        self.width = width
+        self.height = height
+        self.cur_pos = Point(x=0, y=height - 1)
+        self.goal = Point(x=width - 1, y=0)
+
+    def reset(self):
+        self.cur_pos = Point(x=0, y=self.height - 1)
+        return self.cur_pos, 0, False
+
+    def step(self, action):
+        if action == Direction.NORTH:
+            self.cur_pos = Point(self.cur_pos.x, self.cur_pos.y + 1)
+        elif action == Direction.EAST:
+            self.cur_pos = Point(self.cur_pos.x + 1, self.cur_pos.y)											
+        elif action == Direction.SOUTH:
+            self.cur_pos = Point(self.cur_pos.x, self.cur_pos.y - 1)
+        elif action == Direction.WEST:
+            self.cur_pos = Point(self.cur_pos.x - 1, self.cur_pos.y)
+
+        self.cur_pos = Point(
+            max(0, min(self.cur_pos.x, self.width - 1)),
+            max(0, min(self.cur_pos.y, self.height - 1))
+        )
+
+        is_terminal = self.cur_pos == self.goal
+        reward = -1
+
+        return self.cur_pos, reward, is_terminal
+
+    def _repr_(self):
+        res = ""
+        for y in reversed(range(self.height)):
+            for x in range(self.width):
+                if self.goal.x == x and self.goal.y == y:
+                    res += "o" if self.cur_pos.x != x or self.cur_pos.y != y else "@"
+                else:
+                    res += "x" if self.cur_pos.x == x and self.cur_pos.y == y else "_"
+            res += "\n"
+        return res
+
+# Example usage:
+env = SimpleGridWorld()
+print(env)
+print(env.step(Direction.SOUTH))
+print(env.step(Direction.SOUTH))
+print(env.step(Direction.SOUTH))
+print(env.step(Direction.EAST))
+print(env.step(Direction.EAST))
+print(env.step(Direction.EAST))
+print(env.step(Direction.EAST))
